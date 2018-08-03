@@ -29,8 +29,9 @@ decomp_logistic = function(x, y, w = rep(1, nrow(x)),
 
   stopifnot(ncol(x) == length(coefficients))
   stopifnot(ncol(x) == length(interval))
-
   stopifnot(nrow(x) == length(w))
+
+  coefficients[is.na(coefficients)] = 0
 
   interval = unname(ifelse(coefficients < 0, floor(interval) + 0.5, interval))
 
@@ -63,8 +64,8 @@ decomp_logistic = function(x, y, w = rep(1, nrow(x)),
     mutate(z = cumsum(Value),
            yhat = 1 / (1 + exp(-sum(Value)))) %>%
     group_by(ID, interval) %>%
-    mutate(z_start = min(z) - Value[1],
-           z_end = max(z),
+    mutate(z_start = z[1] - Value[1],
+           z_end = z[n()],
            z_diff = z_end - z_start) %>%
     ungroup %>%
     mutate(p_diff = 1 / (1 + exp(-z_end)) - 1 / (1 + exp(-z_start)),
